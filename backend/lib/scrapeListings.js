@@ -11,9 +11,18 @@ db.connect(
   ['listings', 'searches']
 );
 async function scrapeSearch(url) {
+  if (url.length <1) {
+    console.log("Bad url "+ url);
+    return[];
+  }
+  else{
+  console.log("Parsing : " + url);
+  }
   const res = await axios.get(url, {
     responseType: 'text',
-  });
+  })
+    // console.log(res)
+
   const json = await parseStringAsync(res.data, { explicitArray: false });
   if (!json.rss.channel.item) {
     return []; // no items
@@ -26,9 +35,13 @@ async function scrapeSearch(url) {
     date: item.pubDate,
     image: item.enclosure.$.url,
     adId: item.link.split('/').pop(),
+          lat: item['geo:lat'],
+          long: item['geo:long'],
     nah: false,
     from: 'kijiji',
   }));
+
+  var nitems = 0;
   // save to DB
   items.forEach(item => {
     // see if we already have it
@@ -37,15 +50,21 @@ async function scrapeSearch(url) {
       console.log(`Item ${item.adId} already in DB`);
       return;
     }
+
     const geg = db.listings.save(item);
+    nitems+=1;
     console.log(`Saved: ${geg._id}`);
   });
-
+  console.log(`Found ${nitems} items`);
   return items;
 }
+
 async function scrapeListings() {
-  const searches = db.searches.find();
-  const scrapeSearches = searches.map(search => scrapeSearch(search.feed));
+  // const searches = db.searches.find();
+  // const searches =db.searches.find()[0];
+  const searches = db.searches.find().filter(s=>s.platform =="kijiji");
+
+  const scrapeSearches = searches.map(search => scrapeSearch(search.search_term));
   const allData = await Promise.all(scrapeSearches);
   return 'Kijiji Search Finished';
 }

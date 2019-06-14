@@ -20,6 +20,9 @@
     "google-images": "^2.1.0",
     "isomorphic-fetch": "^2.2.1",
     "node-cron": "^2.0.3",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "styled-components": "^4.3.0",
     "xml2js": "^0.4.19"
   },
   "devDependencies": {

@@ -4,11 +4,15 @@ const db = require('diskdb');
 const bodyParser = require('body-parser');
 const { compareAsc } = require('date-fns');
 
+
+const scrapeListings = require('./lib/scrapeListings');
+const scrapeFacebookListings = require('./lib/scrapeFacebook');
+
 require('./lib/cron');
 
 db.connect(
   './db',
-  ['listings', 'searches']
+  ['listings', 'searches', 'search_tags', 'location_tags']
 );
 
 const app = express();
@@ -21,6 +25,7 @@ app.use(bodyParser.json());
 app.post('/searches', async (req, res) => {
   console.log(req.body);
   const search = db.searches.save(req.body);
+  const tags= db.tags
   console.log(search);
   res.json(search);
 });
@@ -45,6 +50,18 @@ app.get('/listings', async (req, res) => {
     .find({ nah: false })
     .sort((a, b) => new Date(b.date) - new Date(a.date));
   res.json(listings);
+});
+
+// Scrape Kijiji
+app.get('/updateKijiji', async (req, res) => {
+  console.log('Scraping kijiji');
+  scrapeListings();
+});
+
+// Scrape facebook
+app.get('/updateFacebook', async (req, res) => {
+  console.log('Scraping facebook');
+  scrapeFacebookListings();
 });
 
 // mark as nah

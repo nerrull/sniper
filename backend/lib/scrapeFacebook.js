@@ -6,14 +6,11 @@ db.connect(
   ['listings', 'searches']
 );
 
-async function scrapeFacebook(query = 'Leather Chair') {
+async function scrapeFacebook(query, location_tags, search_tags) {
   const variables = {
     params: {
       bqf: { callsite: 'COMMERCE_MKTPLACE_WWW', query },
       browse_request_params: {
-        // burlington
-        // filter_location_id: '108043585884666',
-        // hamilton
         filter_location_id: '104011556303312',
         filter_price_lower_bound: 0,
         filter_price_upper_bound: 214748364700,
@@ -36,15 +33,15 @@ async function scrapeFacebook(query = 'Leather Chair') {
   const { data } = await res.json();
   console.log(data);
   // Pagination Cursor - doesn't seem to work if I pass it above
-  // console.log(data.marketplace_search.feed_units.page_info);
+  console.log(data.marketplace_search.feed_units.page_info);
 
   const items = data.marketplace_search.feed_units.edges.map(
     ({
       node: {
         product_item: { for_sale_item: item },
       },
-    }) =>
-      console.log(item) || {
+    }) => 
+        console.log(item) || {
         title: item.group_commerce_item_title,
         link: `https://www.facebook.com/marketplace/item/${item.id}`,
         price: item.formatted_price.text.replace('$', ''),
@@ -53,6 +50,8 @@ async function scrapeFacebook(query = 'Leather Chair') {
         adId: item.id,
         nah: false,
         from: 'facebook',
+        tags: search_tags,
+        location : item.location,
       }
 
     // console.log(for_sale_item.group_commerce_item_title);
@@ -72,8 +71,11 @@ async function scrapeFacebook(query = 'Leather Chair') {
 }
 
 async function scrapeFacebookListings() {
-  const searches = db.searches.find();
-  const scrapeSearches = searches.map(search => scrapeFacebook(search.name));
+  console.log("Scraping facebook");
+
+  const searches = db.searches.find().filter(s=>s.platform =="facebook");
+  console.log(searches);
+  const scrapeSearches = searches.map(search => scrapeFacebook(search.search_term, search.location_tags, search.search_tags));
   const allData = await Promise.all(scrapeSearches);
   return 'Facebook Search Finished';
 }
