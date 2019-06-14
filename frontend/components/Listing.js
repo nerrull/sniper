@@ -66,8 +66,10 @@ const formatter = new Intl.NumberFormat('en-CA', {
   currency: 'CAD',
   maximumSignificantDigits: 1,
 });
+
 export default function Listing({ listing }) {
   const [nah, setNah] = useState();
+  
   return (
     <ListingStyles hidden={nah}>
       <PriceTag>
@@ -89,11 +91,12 @@ export default function Listing({ listing }) {
         <div className="buttons">
           <button
             onClick={() => {
-              setNah(true);
+              setNah(false);
             }}
           >
             Maybe
           </button>
+
           <button
             className="nah"
             onClick={() => {

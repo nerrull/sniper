@@ -5,3 +5,7 @@ backend/db/*
 build/
 .next/
 haters/
+
+.idea/
+.vscode/
+*~

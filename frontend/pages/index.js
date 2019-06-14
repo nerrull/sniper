@@ -5,8 +5,8 @@ import Page from '../components/Page';
 
 const IndexPage = () => (
   <Page>
-    <Listings />
     <AddSearch />
+    <Listings />
     <SearchesList />
   </Page>
 );
